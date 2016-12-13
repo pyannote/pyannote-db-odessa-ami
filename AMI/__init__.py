@@ -34,7 +34,7 @@ del get_versions
 
 from pyannote.database import Database
 from pyannote.database.protocol import SpeakerDiarizationProtocol
-from pyannote.parser import UEMParser, MDTMParser
+from pyannote.parser import MDTMParser
 import os.path as op
 
 
@@ -55,29 +55,21 @@ class OdessaAMISpeakerDiarizationProtocol(SpeakerDiarizationProtocol):
     def __init__(self, preprocessors={}, **kwargs):
         super(OdessaAMISpeakerDiarizationProtocol, self).__init__(
             preprocessors=preprocessors, **kwargs)
-        self.uem_parser_ = UEMParser()
         self.mdtm_parser_ = MDTMParser()
 
     def _subset(self, protocol, subset):
 
         data_dir = op.join(op.dirname(op.realpath(__file__)), 'data')
 
-        # load annotated parts
-        # e.g. /data/{tv|radio|all}.{train|dev|test}.uem
-        path = op.join(data_dir, '{protocol}.{subset}.uem'.format(subset=subset, protocol=protocol))
-        uems = self.uem_parser_.read(path)
-
         # load annotations
         path = op.join(data_dir, '{protocol}.{subset}.mdtm'.format(subset=subset, protocol=protocol))
         mdtms = self.mdtm_parser_.read(path)
 
-        for uri in sorted(uems.uris):
-            annotated = uems(uri)
+        for uri in sorted(mdtms.uris):
             annotation = mdtms(uri)
             current_file = {
                 'database': 'AMI',
                 'uri': uri,
-                'annotated': annotated,
                 'annotation': annotation}
             yield current_file
 
