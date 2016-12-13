@@ -1,0 +1,3 @@
+include versioneer.py
+include AMI/_version.py
+recursive-include AMI/data *
