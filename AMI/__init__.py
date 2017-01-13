@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2016 CNRS
+# Copyright (c) 2016-2017 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ del get_versions
 
 from pyannote.database import Database
 from pyannote.database.protocol import SpeakerDiarizationProtocol
+from pyannote.parser import UEMParser
 from pyannote.parser import MDTMParser
 import os.path as op
 
@@ -56,10 +57,15 @@ class OdessaAMISpeakerDiarizationProtocol(SpeakerDiarizationProtocol):
         super(OdessaAMISpeakerDiarizationProtocol, self).__init__(
             preprocessors=preprocessors, **kwargs)
         self.mdtm_parser_ = MDTMParser()
+        self.uem_parser_ = UEMParser()
 
     def _subset(self, protocol, subset):
 
         data_dir = op.join(op.dirname(op.realpath(__file__)), 'data')
+
+        # load uems
+        path = op.join(data_dir, '{protocol}.{subset}.uem'.format(subset=subset, protocol=protocol))
+        uems = self.uem_parser_.read(path)
 
         # load annotations
         path = op.join(data_dir, '{protocol}.{subset}.mdtm'.format(subset=subset, protocol=protocol))
@@ -67,10 +73,12 @@ class OdessaAMISpeakerDiarizationProtocol(SpeakerDiarizationProtocol):
 
         for uri in sorted(mdtms.uris):
             annotation = mdtms(uri)
+            annotated = uems(uri)
             current_file = {
                 'database': 'AMI',
                 'uri': uri,
-                'annotation': annotation}
+                'annotation': annotation,
+                'annotated': annotated}
             yield current_file
 
 
