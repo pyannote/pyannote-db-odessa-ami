@@ -103,6 +103,27 @@ class P1(OdessaAMISpeakerDiarizationProtocol):
     def tst_iter(self):
         return self._subset('p1', 'tst')
 
+class P1MH(OdessaAMISpeakerDiarizationProtocol):
+    """ODESSA/AMI P1MH (mix-headset) protocol
+
+    Parameters
+    ----------
+    preprocessors : dict or (key, preprocessor) iterable
+        When provided, each protocol item (dictionary) are preprocessed, such
+        that item[key] = preprocessor(**item). In case 'preprocessor' is not
+        callable, it should be a string containing placeholder for item keys
+        (e.g. {'wav': '/path/to/{uri}.wav'})
+    """
+
+    def trn_iter(self):
+        return self._subset('p1mh', 'trn')
+
+    def dev_iter(self):
+        return self._subset('p1mh', 'dev')
+
+    def tst_iter(self):
+        return self._subset('p1mh', 'tst')
+
 
 class P2(OdessaAMISpeakerDiarizationProtocol):
     """ODESSA/AMI P2 protocol
@@ -125,6 +146,26 @@ class P2(OdessaAMISpeakerDiarizationProtocol):
     def tst_iter(self):
         return self._subset('p2', 'tst')
 
+class P2MH(OdessaAMISpeakerDiarizationProtocol):
+    """ODESSA/AMI P2MH (mix-headset) protocol
+
+    Parameters
+    ----------
+    preprocessors : dict or (key, preprocessor) iterable
+        When provided, each protocol item (dictionary) are preprocessed, such
+        that item[key] = preprocessor(**item). In case 'preprocessor' is not
+        callable, it should be a string containing placeholder for item keys
+        (e.g. {'wav': '/path/to/{uri}.wav'})
+    """
+
+    def trn_iter(self):
+        return self._subset('p2mh', 'trn')
+
+    def dev_iter(self):
+        return self._subset('p2mh', 'dev')
+
+    def tst_iter(self):
+        return self._subset('p2mh', 'tst')
 
 class AMI(Database):
     """AMI corpus
@@ -153,5 +194,11 @@ Website
         self.register_protocol(
             'SpeakerDiarization', 'P1', P1)
 
+	self.register_protocol(
+            'SpeakerDiarization', 'P1MH', P1MH)
+
         self.register_protocol(
             'SpeakerDiarization', 'P2', P2)
+
+	self.register_protocol(
+            'SpeakerDiarization', 'P2MH', P2MH)
