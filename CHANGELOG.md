@@ -1,3 +1,8 @@
+### Version 0.4 (2017-04-18)
+
+  - feat: add mix-headset protocols
+  - setup: switch to pyannote.parser 0.6.5
+
 ### Version 0.3.1 (2017-01-23)
 
   - fix: add missing speaker MEO069 in file EN2001a.Array1-03
