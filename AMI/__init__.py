@@ -103,6 +103,7 @@ class P1(OdessaAMISpeakerDiarizationProtocol):
     def tst_iter(self):
         return self._subset('p1', 'tst')
 
+
 class P1MH(OdessaAMISpeakerDiarizationProtocol):
     """ODESSA/AMI P1MH (mix-headset) protocol
 
@@ -145,6 +146,7 @@ class P2(OdessaAMISpeakerDiarizationProtocol):
 
     def tst_iter(self):
         return self._subset('p2', 'tst')
+
 
 class P2MH(OdessaAMISpeakerDiarizationProtocol):
     """ODESSA/AMI P2MH (mix-headset) protocol
@@ -194,11 +196,11 @@ Website
         self.register_protocol(
             'SpeakerDiarization', 'P1', P1)
 
-	self.register_protocol(
+        self.register_protocol(
             'SpeakerDiarization', 'P1MH', P1MH)
 
         self.register_protocol(
             'SpeakerDiarization', 'P2', P2)
 
-	self.register_protocol(
+        self.register_protocol(
             'SpeakerDiarization', 'P2MH', P2MH)
