@@ -194,11 +194,11 @@ Website
         self.register_protocol(
             'SpeakerDiarization', 'P1', P1)
 
-	self.register_protocol(
+        self.register_protocol(
             'SpeakerDiarization', 'P1MH', P1MH)
 
         self.register_protocol(
             'SpeakerDiarization', 'P2', P2)
 
-	self.register_protocol(
+        self.register_protocol(
             'SpeakerDiarization', 'P2MH', P2MH)
