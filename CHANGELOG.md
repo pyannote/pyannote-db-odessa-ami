@@ -1,3 +1,8 @@
+### Version 0.4.1 (2017-09-07)
+
+  - setup: switch to pyannote.database 0.12
+  - fix: fix mixed-up tabs/spaces
+
 ### Version 0.4 (2017-04-18)
 
   - feat: add mix-headset protocols
