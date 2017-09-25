@@ -106,7 +106,7 @@ Protocol is initialized as follows:
 ...                         preprocessors=preprocessors)
 ```
 
-#### Training
+### Training
 
 `protocol.train()` can be used like in the speaker diarization protocol above.
 
