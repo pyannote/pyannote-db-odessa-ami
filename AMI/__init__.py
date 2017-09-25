@@ -294,14 +294,9 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
             model_id = model.model_id
 
-            try:
-                speech_turns = ref.get_group((session_id, model_id))
-            except KeyError as e:
-                print('Failure', model_id)
-                continue
-
             segments = []
             crop_segments = []
+            speech_turns = ref.get_group((session_id, model_id))
             for turn in speech_turns.itertuples():
 
                 if turn.duration == 0.:
@@ -381,11 +376,7 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
             model_id = trial.model_id
             session_id = trial.session_id
 
-            try:
-                session = sessions.loc[session_id]
-            except Exception as e:
-                print('Failure session {session_id}'.format(session_id=session_id))
-                continue
+            session = sessions.loc[session_id]
 
             uri = session.uri + '.Mix-Headset'
             crop_uri = session_id
