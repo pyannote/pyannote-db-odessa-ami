@@ -41,6 +41,8 @@ setup(
     package_data={
         'AMI': [
             'data/*',
+            'data/llss/*/*',
+            'data/llss/*/*/*'
         ],
     },
     include_package_data=True,
