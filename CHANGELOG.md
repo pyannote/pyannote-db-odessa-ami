@@ -1,3 +1,9 @@
+### Version 0.5 (2017-10-02)
+
+  - feat: add speaker spotting protocol
+  - setup: switch to pyannote.database 1.0
+  - setup: switch to pyannote.core 1.1
+
 ### Version 0.4.1 (2017-09-07)
 
   - setup: switch to pyannote.database 0.12
