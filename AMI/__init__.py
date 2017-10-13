@@ -200,46 +200,25 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
         for session in sessions.itertuples():
 
             uri = session.uri + '.Mix-Headset'
-            crop_uri = session.session_id
-
             session_id = session.session_id
-
             annotation = Annotation(uri=uri)
-            crop_annotation = Annotation(uri=crop_uri)
 
             for i, turn in enumerate(ref.get_group(session_id).itertuples()):
 
                 segment = Segment(turn.start,
                                   turn.start + turn.duration)
-
-                crop_segment = Segment(
-                    turn.start - session.start,
-                    turn.start - session.start + turn.duration)
-
                 speaker_id = turn.speaker_id
-
                 annotation[segment, i] = speaker_id
-                crop_annotation[crop_segment, i] = speaker_id
 
             annotated = Timeline(
                 segments=[Segment(session.start, session.end)],
                 uri=uri)
-
-            crop_annotated = Timeline(
-                segments=[Segment(0., session.end - session.start)],
-                uri=crop_uri)
 
             current_file = {
                 'uri': uri,
                 'database': 'AMI',
                 'annotation': annotation,
                 'annotated': annotated,
-                'crop': {
-                    'uri': crop_uri,
-                    'database': 'AMI',
-                    'annotation': crop_annotation,
-                    'annotated': crop_annotated
-                }
             }
 
             yield current_file
@@ -288,45 +267,27 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
             session_id = model.session_id
             session = sessions.loc[session_id]
-
             uri = session.uri + '.Mix-Headset'
-            crop_uri = session_id
-
             model_id = model.model_id
 
             segments = []
-            crop_segments = []
             speech_turns = ref.get_group((session_id, model_id))
             for turn in speech_turns.itertuples():
-
                 if turn.duration == 0.:
                     continue
 
                 segment = Segment(
                     turn.start,
                     turn.start + turn.duration)
-
-                crop_segment = Segment(
-                    turn.start - session.start,
-                    turn.start - session.start + turn.duration)
-
                 segments.append(segment)
-                crop_segments.append(crop_segment)
 
             enrol_with = Timeline(segments=segments, uri=uri)
-            crop_enrol_with = Timeline(segments=crop_segments, uri=crop_uri)
 
             current_enrolment = {
                 'database': 'AMI',
                 'uri': uri,
                 'model_id': model_id,
                 'enrol_with': enrol_with,
-                'crop': {
-                    'database': 'AMI',
-                    'uri': crop_uri,
-                    'model_id': model_id,
-                    'enrol_with': crop_enrol_with
-                }
             }
 
             yield current_enrolment
@@ -375,21 +336,15 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
             model_id = trial.model_id
             session_id = trial.session_id
-
             session = sessions.loc[session_id]
-
             uri = session.uri + '.Mix-Headset'
-            crop_uri = session_id
-
             try_with = Segment(session.start, session.end)
-            crop_try_with = Segment(0, session.end - session.start)
 
             # TODO / check if this is always true...
             # otherwise we may need another mapping file
             speaker_id = model_id.split('_')[0]
 
             segments = []
-            crop_segments = []
             try:
                 speech_turns = ref.get_group((session_id, speaker_id))
                 for turn in speech_turns.itertuples():
@@ -405,18 +360,12 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
                         turn.start,
                         turn.start + turn.duration)
 
-                    crop_segment = Segment(
-                        turn.start - session.start,
-                        turn.start - session.start + turn.duration)
-
                     segments.append(segment)
-                    crop_segments.append(crop_segment)
 
             except KeyError as e:
                 pass
 
             reference = Timeline(segments=segments, uri=uri)
-            crop_reference = Timeline(segments=crop_segments, uri=crop_uri)
 
             current_trial = {
                 'database': 'AMI',
@@ -424,13 +373,6 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
                 'try_with': try_with,
                 'model_id': model_id,
                 'reference': reference,
-                'crop': {
-                    'database': 'AMI',
-                    'uri': crop_uri,
-                    'try_with': crop_try_with,
-                    'model_id': model_id,
-                    'reference': crop_reference
-                }
             }
 
             yield current_trial

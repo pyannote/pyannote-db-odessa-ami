@@ -1,3 +1,7 @@
+### Version 0.5.2 (2017-10-13)
+
+  - chore: remove redundant 'crop' keys in speaker spotting protocol
+
 ### Version 0.5.1 (2017-10-02)
 
   - feat: add speaker spotting protocol
