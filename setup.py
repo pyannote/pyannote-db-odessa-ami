@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2016-2017 CNRS
+# Copyright (c) 2016-2018 CNRS
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,24 +40,21 @@ setup(
     packages=find_packages(),
     package_data={
         'AMI': [
-            'data/*',
-            'data/llss/*/*',
-            'data/llss/*/*/*'
+            'data/speaker_diarization/*',
+            'data/speaker_spotting/*',
         ],
     },
     include_package_data=True,
     install_requires=[
-        'pyannote.core >= 1.1',
-        'pyannote.database >= 1.0',
-        'pyannote.parser >= 0.6.5',
+        'pyannote.core >= 1.3',
+        'pyannote.database >= 1.1',
+        'pandas >= 0.22',
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",

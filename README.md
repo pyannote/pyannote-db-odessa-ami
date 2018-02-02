@@ -1,6 +1,5 @@
 # ODESSA/AMI plugin for pyannote.database
 
-
 ## Installation
 
 ```bash
@@ -21,7 +20,7 @@ Protocol is initialized as follows:
 ```python
 >>> from pyannote.database import get_protocol, FileFinder
 >>> preprocessors = {'audio': FileFinder()}
->>> protocol = get_protocol('AMI.SpeakerDiarization.P1',
+>>> protocol = get_protocol('AMI.SpeakerDiarization.MixHeadset',
 ...                         preprocessors=preprocessors)
 ```
 

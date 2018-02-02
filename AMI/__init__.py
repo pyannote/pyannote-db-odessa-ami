@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2016-2017 CNRS
+# Copyright (c) 2016-2018 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,194 +32,58 @@ __version__ = get_versions()['version']
 del get_versions
 
 
-from pyannote.core import Segment, Timeline, Annotation
+from pyannote.core import Segment, Timeline, Annotation, SlidingWindow
 from pyannote.database import Database
 from pyannote.database.protocol import SpeakerDiarizationProtocol
 from pyannote.database.protocol import SpeakerSpottingProtocol
-from pyannote.parser import UEMParser
-from pyannote.parser import MDTMParser
 from pandas import read_table
-import os.path as op
+from pathlib import Path
 
 
-class OdessaAMISpeakerDiarizationProtocol(SpeakerDiarizationProtocol):
-    """Base speaker diarization protocol for ODESSA/AMI database
+class SpeakerDiarization(SpeakerDiarizationProtocol):
 
-    This class should be inherited from, not used directly.
+    def _load_data(self, subset):
 
-    Parameters
-    ----------
-    preprocessors : dict or (key, preprocessor) iterable
-        When provided, each protocol item (dictionary) are preprocessed, such
-        that item[key] = preprocessor(**item). In case 'preprocessor' is not
-        callable, it should be a string containing placeholder for item keys
-        (e.g. {'wav': '/path/to/{uri}.wav'})
-    """
+        data_dir = Path(__file__).parent / 'data' / 'speaker_diarization'
 
-    def __init__(self, preprocessors={}, **kwargs):
-        super(OdessaAMISpeakerDiarizationProtocol, self).__init__(
-            preprocessors=preprocessors, **kwargs)
-        self.mdtm_parser_ = MDTMParser()
-        self.uem_parser_ = UEMParser()
+        annotated = data_dir / f'{subset}.uem'
+        names = ['uri', 'NA0', 'start', 'end']
+        annotated = read_table(annotated, delim_whitespace=True, names=names)
 
-    def _subset(self, protocol, subset):
+        annotation = data_dir / f'{subset}.mdtm'
+        names = ['uri', 'NA0', 'start', 'duration',
+                 'NA1', 'NA2', 'gender', 'speaker']
+        annotation = read_table(annotation, delim_whitespace=True, names=names)
 
-        data_dir = op.join(op.dirname(op.realpath(__file__)), 'data')
-
-        # load uems
-        path = op.join(data_dir, '{protocol}.{subset}.uem'.format(subset=subset, protocol=protocol))
-        uems = self.uem_parser_.read(path)
-
-        # load annotations
-        path = op.join(data_dir, '{protocol}.{subset}.mdtm'.format(subset=subset, protocol=protocol))
-        mdtms = self.mdtm_parser_.read(path)
-
-        for uri in sorted(mdtms.uris):
-            annotation = mdtms(uri)
-            annotated = uems(uri)
-            current_file = {
-                'database': 'AMI',
-                'uri': uri,
-                'annotation': annotation,
-                'annotated': annotated}
-            yield current_file
-
-
-class P1(OdessaAMISpeakerDiarizationProtocol):
-    """ODESSA/AMI P1 protocol
-
-    Parameters
-    ----------
-    preprocessors : dict or (key, preprocessor) iterable
-        When provided, each protocol item (dictionary) are preprocessed, such
-        that item[key] = preprocessor(**item). In case 'preprocessor' is not
-        callable, it should be a string containing placeholder for item keys
-        (e.g. {'wav': '/path/to/{uri}.wav'})
-    """
-
-    def trn_iter(self):
-        return self._subset('p1', 'trn')
-
-    def dev_iter(self):
-        return self._subset('p1', 'dev')
-
-    def tst_iter(self):
-        return self._subset('p1', 'tst')
-
-
-class P1MH(OdessaAMISpeakerDiarizationProtocol):
-    """ODESSA/AMI P1MH (mix-headset) protocol
-
-    Parameters
-    ----------
-    preprocessors : dict or (key, preprocessor) iterable
-        When provided, each protocol item (dictionary) are preprocessed, such
-        that item[key] = preprocessor(**item). In case 'preprocessor' is not
-        callable, it should be a string containing placeholder for item keys
-        (e.g. {'wav': '/path/to/{uri}.wav'})
-    """
-
-    def trn_iter(self):
-        return self._subset('p1mh', 'trn')
-
-    def dev_iter(self):
-        return self._subset('p1mh', 'dev')
-
-    def tst_iter(self):
-        return self._subset('p1mh', 'tst')
-
-
-class P2(OdessaAMISpeakerDiarizationProtocol):
-    """ODESSA/AMI P2 protocol
-
-    Parameters
-    ----------
-    preprocessors : dict or (key, preprocessor) iterable
-        When provided, each protocol item (dictionary) are preprocessed, such
-        that item[key] = preprocessor(**item). In case 'preprocessor' is not
-        callable, it should be a string containing placeholder for item keys
-        (e.g. {'wav': '/path/to/{uri}.wav'})
-    """
-
-    def trn_iter(self):
-        return self._subset('p2', 'trn')
-
-    def dev_iter(self):
-        return self._subset('p2', 'dev')
-
-    def tst_iter(self):
-        return self._subset('p2', 'tst')
-
-
-class P2MH(OdessaAMISpeakerDiarizationProtocol):
-    """ODESSA/AMI P2MH (mix-headset) protocol
-
-    Parameters
-    ----------
-    preprocessors : dict or (key, preprocessor) iterable
-        When provided, each protocol item (dictionary) are preprocessed, such
-        that item[key] = preprocessor(**item). In case 'preprocessor' is not
-        callable, it should be a string containing placeholder for item keys
-        (e.g. {'wav': '/path/to/{uri}.wav'})
-    """
-
-    def trn_iter(self):
-        return self._subset('p2mh', 'trn')
-
-    def dev_iter(self):
-        return self._subset('p2mh', 'dev')
-
-    def tst_iter(self):
-        return self._subset('p2mh', 'tst')
-
-
-class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
+        return {'annotated': annotated,
+                'annotation': annotation}
 
     def _xxx_iter(self, subset):
 
-        data_dir = op.join(op.dirname(op.realpath(__file__)), 'data')
+        data = self._load_data(subset)
 
-        # reference
-        ref_template = 'AMI.split_references/AMI.p1mh.splitSessionsWithOffset.{subset}.rttm'
-        ref_path = op.join(data_dir, 'llss',
-                           ref_template.format(subset=subset))
-        ref = read_table(
-            ref_path, delim_whitespace=True,
-            names=['SPEAKER', 'session_id', '1', 'start', 'duration',
-                   'NA1', 'NA2', 'speaker_id', 'NA3', 'NA4'])
-        ref = ref.groupby('session_id')
+        AnnotatedGroups = data['annotated'].groupby(by='uri')
+        AnnotationGroups = data['annotation'].groupby(by='uri')
 
-        # session mapping
-        session_template = 'AMI.split_references/AMI.p1mh.splitSessionsMapping.{subset}.lst'
-        session_path = op.join(data_dir, 'llss',
-                           session_template.format(subset=subset))
-        sessions = read_table(
-            session_path, delim_whitespace=True,
-            names=['session_id', 'uri', 'start', 'end'])
+        for raw_uri, annotated in AnnotatedGroups:
 
-        for session in sessions.itertuples():
+            uri = f'{raw_uri}.Mix-Headset'
 
-            uri = session.uri + '.Mix-Headset'
-            session_id = session.session_id
+            segments = []
+            for segment in annotated.itertuples():
+                segments.append(Segment(start=segment.start, end=segment.end))
+
             annotation = Annotation(uri=uri)
-
-            for i, turn in enumerate(ref.get_group(session_id).itertuples()):
-
-                segment = Segment(turn.start,
-                                  turn.start + turn.duration)
-                speaker_id = turn.speaker_id
-                annotation[segment, i] = speaker_id
-
-            annotated = Timeline(
-                segments=[Segment(session.start, session.end)],
-                uri=uri)
+            for t, turn in enumerate(AnnotationGroups.get_group(raw_uri).itertuples()):
+                segment = Segment(start=turn.start,
+                                  end=turn.start + turn.duration)
+                annotation[segment, t] = turn.speaker
 
             current_file = {
-                'uri': uri,
                 'database': 'AMI',
-                'annotation': annotation,
-                'annotated': annotated,
-            }
+                'uri': uri,
+                'annotated': Timeline(uri=uri, segments=segments),
+                'annotation': annotation}
 
             yield current_file
 
@@ -232,55 +96,59 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
     def tst_iter(self):
         return self._xxx_iter('tst')
 
+
+class SpeakerSpotting(SpeakerDiarization, SpeakerSpottingProtocol):
+
+    def _sessionify(self, current_files):
+
+        for current_file in current_files:
+
+            annotated = current_file['annotated']
+            annotation = current_file['annotation']
+
+            for segment in annotated:
+                sessions = SlidingWindow(start=segment.start,
+                                         duration=60., step=60.,
+                                         end=segment.end - 60.)
+
+                for session in sessions:
+
+                    session_file = dict(current_file)
+                    session_file['annotated'] = annotated.crop(session)
+                    session_file['annotation'] = annotation.crop(session)
+
+                    yield session_file
+
+    def trn_iter(self):
+        return self._sessionify(super().trn_iter())
+
+    def dev_iter(self):
+        return self._sessionify(super().dev_iter())
+
+    def tst_iter(self):
+        return self._sessionify(super().tst_iter())
+
     def _xxx_enrol_iter(self, subset):
 
-        data_dir = op.join(op.dirname(op.realpath(__file__)), 'data')
+        # load enrolments
+        data_dir = Path(__file__).parent / 'data' / 'speaker_spotting'
+        enrolments = data_dir / f'{subset}.enrol.txt'
+        names = ['uri', 'NA0', 'start', 'duration',
+                 'NA1', 'NA2', 'NA3', 'model_id']
+        enrolments = read_table(enrolments, delim_whitespace=True, names=names)
 
-        # reference
-        ref_template = 'AMI.p1mh/{subset}/AMI.p1mh.enrollment_60sec.enrollment.{subset}.rttm'
-        ref_path = op.join(data_dir, 'llss',
-                           ref_template.format(subset=subset))
-        ref = read_table(
-            ref_path, delim_whitespace=True,
-            names=['SPEAKER', 'session_id', '1', 'start', 'duration',
-                   'NA1', 'NA2', 'model_id', 'NA3', 'NA4'])
-        ref = ref.groupby(['session_id', 'model_id'])
+        for model_id, turns in enrolments.groupby(by='model_id'):
 
-        # session mapping
-        session_template = 'AMI.split_references/AMI.p1mh.splitSessionsMapping.{subset}.lst'
-        session_path = op.join(data_dir, 'llss',
-                           session_template.format(subset=subset))
-        sessions = read_table(
-            session_path, delim_whitespace=True,
-            names=['session_id', 'uri', 'start', 'end'],
-            index_col='session_id')
-
-        # models
-        model_template = 'AMI.p1mh/{subset}/AMI.p1mh.enrollment_60sec.speakerModels.{subset}.lst'
-        model_path = op.join(data_dir, 'llss',
-                             model_template.format(subset=subset))
-        models = read_table(
-            model_path, delim_whitespace=True,
-            names=['model_id', 'session_id'])
-
-        for model in models.itertuples():
-
-            session_id = model.session_id
-            session = sessions.loc[session_id]
-            uri = session.uri + '.Mix-Headset'
-            model_id = model.model_id
-
+            # gather enrolment data
             segments = []
-            speech_turns = ref.get_group((session_id, model_id))
-            for turn in speech_turns.itertuples():
-                if turn.duration == 0.:
-                    continue
-
-                segment = Segment(
-                    turn.start,
-                    turn.start + turn.duration)
-                segments.append(segment)
-
+            for t, turn in enumerate(turns.itertuples()):
+                if t == 0:
+                    raw_uri = turn.uri
+                    uri = f'{raw_uri}.Mix-Headset'
+                segment = Segment(start=turn.start,
+                                  end=turn.start + turn.duration)
+                if segment:
+                    segments.append(segment)
             enrol_with = Timeline(segments=segments, uri=uri)
 
             current_enrolment = {
@@ -292,9 +160,6 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
             yield current_enrolment
 
-    def trn_enrol_iter(self):
-        return self._xxx_enrol_iter('trn')
-
     def dev_enrol_iter(self):
         return self._xxx_enrol_iter('dev')
 
@@ -303,70 +168,44 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
     def _xxx_try_iter(self, subset):
 
-        data_dir = op.join(op.dirname(op.realpath(__file__)), 'data')
+        # load "who speaks when" reference and group by (uri, speaker)
+        data = self._load_data(subset)
+        AnnotationGroups = data['annotation'].groupby(by=['uri', 'speaker'])
 
-        # reference
-        ref_template = 'AMI.split_references/AMI.p1mh.splitSessionsWithOffset.{subset}.rttm'
-        ref_path = op.join(data_dir, 'llss',
-                           ref_template.format(subset=subset))
-        ref = read_table(
-            ref_path, delim_whitespace=True,
-            names=['SPEAKER', 'session_id', '1', 'start', 'duration',
-                   'NA1', 'NA2', 'speaker_id', 'NA3', 'NA4'])
-        ref = ref.groupby(['session_id', 'speaker_id'])
-
-        # list of trials
-        trl_template = 'AMI.p1mh/{subset}/AMI.p1mh.enrollment_60sec.LLSS.{subset}.trl'
-        trl_path = op.join(data_dir, 'llss',
-                           trl_template.format(subset=subset))
-        trials = read_table(
-            trl_path, delim_whitespace=True,
-            names=['model_id', 'session_id', 'start', 'trial'])
-
-        # session mapping
-        session_template = 'AMI.split_references/AMI.p1mh.splitSessionsMapping.{subset}.lst'
-        session_path = op.join(data_dir, 'llss',
-                           session_template.format(subset=subset))
-        sessions = read_table(
-            session_path, delim_whitespace=True,
-            names=['session_id', 'uri', 'start', 'end'],
-            index_col='session_id')
+        # load trials
+        data_dir = Path(__file__).parent / 'data' / 'speaker_spotting'
+        trials = data_dir / f'{subset}.trial.txt'
+        names = ['model_id', 'uri', 'start', 'end', 'target', 'first', 'total']
+        trials = read_table(trials, delim_whitespace=True, names=names)
 
         for trial in trials.itertuples():
 
             model_id = trial.model_id
-            session_id = trial.session_id
-            session = sessions.loc[session_id]
-            uri = session.uri + '.Mix-Headset'
-            try_with = Segment(session.start, session.end)
 
-            # TODO / check if this is always true...
-            # otherwise we may need another mapping file
-            speaker_id = model_id.split('_')[0]
+            # FIE038_m1 ==> FIE038
+            # FIE038_m42 ==> FIE038
+            # Bernard_Pivot_m1 ==> Bernard_Pivot
+            speaker = '_'.join(model_id.split('_')[:-1])
 
+            # append Mix-Headset to uri
+            raw_uri = trial.uri
+            uri = f'{raw_uri}.Mix-Headset'
+
+            # trial session
+            session = Segment(start=trial.start, end=trial.end)
+            try_with = Timeline(uri=uri, segments=[session])
+
+            # get all turns from target speaker within session
             segments = []
-            try:
-                speech_turns = ref.get_group((session_id, speaker_id))
-                for turn in speech_turns.itertuples():
-
-                    if turn.duration < 0:
-                        print('Negative duration {session_id} / {speaker_id}'.format(session_id=session_id, speaker_id=speaker_id))
-                        continue
-
-                    if turn.duration == 0.:
-                        continue
-
-                    segment = Segment(
-                        turn.start,
-                        turn.start + turn.duration)
-
+            if trial.target == 'target':
+                turns = AnnotationGroups.get_group((raw_uri, speaker))
+                for turn in turns.itertuples():
+                    segment = Segment(start=turn.start,
+                                      end=turn.start + turn.duration)
                     segments.append(segment)
+            reference = Timeline(uri=uri, segments=segments).crop(session)
 
-            except KeyError as e:
-                pass
-
-            reference = Timeline(segments=segments, uri=uri)
-
+            # pack & yield trial
             current_trial = {
                 'database': 'AMI',
                 'uri': uri,
@@ -377,9 +216,6 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
             yield current_trial
 
-    def trn_try_iter(self):
-        return self._xxx_try_iter('trn')
-
     def dev_try_iter(self):
         return self._xxx_try_iter('dev')
 
@@ -388,40 +224,13 @@ class MixHeadsetSpeakerSpotting(SpeakerSpottingProtocol):
 
 
 class AMI(Database):
-    """AMI corpus
-
-Parameters
-----------
-preprocessors : dict or (key, preprocessor) iterable
-    When provided, each protocol item (dictionary) are preprocessed, such
-    that item[key] = preprocessor(**item). In case 'preprocessor' is not
-    callable, it should be a string containing placeholder for item keys
-    (e.g. {'wav': '/path/to/{uri}.wav'})
-
-Reference
----------
-
-Citation
---------
-
-Website
--------
-    """
+    """AMI corpus"""
 
     def __init__(self, preprocessors={}, **kwargs):
         super(AMI, self).__init__(preprocessors=preprocessors, **kwargs)
 
         self.register_protocol(
-            'SpeakerDiarization', 'P1', P1)
+            'SpeakerDiarization', 'MixHeadset', SpeakerDiarization)
 
         self.register_protocol(
-            'SpeakerDiarization', 'P1MH', P1MH)
-
-        self.register_protocol(
-            'SpeakerDiarization', 'P2', P2)
-
-        self.register_protocol(
-            'SpeakerDiarization', 'P2MH', P2MH)
-
-        self.register_protocol(
-            'SpeakerSpotting', 'MixHeadset', MixHeadsetSpeakerSpotting)
+            'SpeakerSpotting', 'MixHeadset', SpeakerSpotting)
