@@ -48,7 +48,7 @@ setup(
     install_requires=[
         'pyannote.core >= 1.3',
         'pyannote.database >= 1.1',
-        'pandas >= 0.22',
+        'pandas >= 0.20',
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
