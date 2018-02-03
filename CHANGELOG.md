@@ -1,4 +1,4 @@
-### Version 0.6 (2018-02-xx)
+### Version 0.6 (2018-02-03)
 
   - BREAKING: drop Python 2 support
   - BREAKING: only two protocols (AMI.Speaker{Diarization|Spotting}.MixHeadset)
