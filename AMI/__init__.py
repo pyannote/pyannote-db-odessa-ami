@@ -192,8 +192,7 @@ class SpeakerSpotting(SpeakerDiarization, SpeakerSpottingProtocol):
             uri = f'{raw_uri}.Mix-Headset'
 
             # trial session
-            session = Segment(start=trial.start, end=trial.end)
-            try_with = Timeline(uri=uri, segments=[session])
+            try_with = Segment(start=trial.start, end=trial.end)
 
             # get all turns from target speaker within session
             segments = []
@@ -203,7 +202,7 @@ class SpeakerSpotting(SpeakerDiarization, SpeakerSpottingProtocol):
                     segment = Segment(start=turn.start,
                                       end=turn.start + turn.duration)
                     segments.append(segment)
-            reference = Timeline(uri=uri, segments=segments).crop(session)
+            reference = Timeline(uri=uri, segments=segments).crop(try_with)
 
             # pack & yield trial
             current_trial = {
