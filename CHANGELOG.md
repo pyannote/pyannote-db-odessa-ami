@@ -1,3 +1,8 @@
+### Version 0.6 (2018-02-03)
+
+  - BREAKING: drop Python 2 support
+  - BREAKING: only two protocols (AMI.Speaker{Diarization|Spotting}.MixHeadset)
+
 ### Version 0.5.2 (2017-10-13)
 
   - chore: remove redundant 'crop' keys in speaker spotting protocol
