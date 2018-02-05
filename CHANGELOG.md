@@ -1,3 +1,9 @@
+### Version 0.7 (2018-02-05)
+
+  - feat: add support for 'diarization' attribute to enable/disable
+    'annotation' and 'annotated keys
+  - fix: fix segments with empty durations
+
 ### Version 0.6.1 (2018-02-03)
 
   - BREAKING: drop Python 2 support

@@ -168,9 +168,14 @@ class SpeakerSpotting(SpeakerDiarization, SpeakerSpottingProtocol):
 
     def _xxx_try_iter(self, subset):
 
-        # load "who speaks when" reference and group by (uri, speaker)
+        # load "who speaks when" reference
         data = self._load_data(subset)
-        AnnotationGroups = data['annotation'].groupby(by=['uri', 'speaker'])
+
+        diarization = getattr(self, 'diarization', True)
+        if diarization:
+            AnnotationGroups = data['annotation'].groupby(by='uri')
+        else:
+            AnnotationGroups = data['annotation'].groupby(by=['uri', 'speaker'])
 
         # load trials
         data_dir = Path(__file__).parent / 'data' / 'speaker_spotting'
@@ -194,24 +199,54 @@ class SpeakerSpotting(SpeakerDiarization, SpeakerSpottingProtocol):
             # trial session
             try_with = Segment(start=trial.start, end=trial.end)
 
-            # get all turns from target speaker within session
-            segments = []
-            if trial.target == 'target':
-                turns = AnnotationGroups.get_group((raw_uri, speaker))
-                for turn in turns.itertuples():
+            if diarization:
+                # 'annotation' & 'annotated' are needed when diarization is set
+                # therefore, this needs a bit more work than when set to False.
+
+                annotation = Annotation(uri=uri)
+                turns = AnnotationGroups.get_group(raw_uri)
+                for t, turn in enumerate(turns.itertuples()):
                     segment = Segment(start=turn.start,
                                       end=turn.start + turn.duration)
-                    segments.append(segment)
-            reference = Timeline(uri=uri, segments=segments).crop(try_with)
+                    if not (segment & try_with):
+                        continue
+                    annotation[segment, t] = turn.speaker
 
-            # pack & yield trial
-            current_trial = {
-                'database': 'AMI',
-                'uri': uri,
-                'try_with': try_with,
-                'model_id': model_id,
-                'reference': reference,
-            }
+                annotation = annotation.crop(try_with)
+                reference = annotation.label_timeline(speaker)
+                annotated = Timeline(uri=uri, segments=[try_with])
+
+                # pack & yield trial
+                current_trial = {
+                    'database': 'AMI',
+                    'uri': uri,
+                    'try_with': try_with,
+                    'model_id': model_id,
+                    'reference': reference,
+                    'annotation': annotation,
+                    'annotated': annotated,
+                }
+
+            else:
+                # 'annotation' & 'annotated' are not needed when diarization is
+                # set to False -- leading to a faster implementation...
+                segments = []
+                if trial.target == 'target':
+                    turns = AnnotationGroups.get_group((raw_uri, speaker))
+                    for t, turn in enumerate(turns.itertuples()):
+                        segment = Segment(start=turn.start,
+                                          end=turn.start + turn.duration)
+                        segments.append(segment)
+                reference = Timeline(uri=uri, segments=segments).crop(try_with)
+
+                # pack & yield trial
+                current_trial = {
+                    'database': 'AMI',
+                    'uri': uri,
+                    'try_with': try_with,
+                    'model_id': model_id,
+                    'reference': reference,
+                }
 
             yield current_trial
 
