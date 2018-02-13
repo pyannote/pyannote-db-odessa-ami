@@ -257,6 +257,48 @@ class SpeakerSpotting(SpeakerDiarization, SpeakerSpottingProtocol):
         return self._xxx_try_iter('tst')
 
 
+class SpeakerSpottingIntraSite(SpeakerSpotting):
+
+    def keep_trial(self, current_trial):
+
+        # keep all target trials
+        if current_trial['reference']:
+            return True
+
+        # only keep "same site" non-target trials
+        # FEE041_m1 ==> second letter = E ==> Edimburgh
+        model_site = current_trial['model_id'][1]
+        # ES2003a ==> first letter = E ==> Edimburgh
+        trial_site = current_trial['uri'][0]
+        return model_site == trial_site
+
+    def dev_try_iter(self):
+        trials = super(SpeakerSpottingIntraSite, self).dev_try_iter()
+        for current_trial in trials:
+            if self.keep_trial(current_trial):
+                yield current_trial
+
+    def tst_try_iter(self):
+        trials = super(SpeakerSpottingIntraSite, self).tst_try_iter()
+        for current_trial in trials:
+            if self.keep_trial(current_trial):
+                yield current_trial
+
+
+class SpeakerSpottingInterSite(SpeakerSpottingIntraSite):
+
+    def keep_trial(self, current_trial):
+
+        # keep all target trials
+        if current_trial['reference']:
+            return True
+
+        # only keep "different sites" non-target trials
+        model_site = current_trial['model_id'][1]
+        trial_site = current_trial['uri'][0]
+        return model_site != trial_site
+
+
 class AMI(Database):
     """AMI corpus"""
 
@@ -268,3 +310,9 @@ class AMI(Database):
 
         self.register_protocol(
             'SpeakerSpotting', 'MixHeadset', SpeakerSpotting)
+
+        self.register_protocol(
+            'SpeakerSpotting', 'MixHeadsetIntraSite', SpeakerSpottingIntraSite)
+
+        self.register_protocol(
+            'SpeakerSpotting', 'MixHeadsetInterSite', SpeakerSpottingInterSite)
