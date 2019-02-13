@@ -106,6 +106,21 @@ redefined.
 Moreover, original files have also been split into shorter sessions in order to
 increase the number of trials.
 
+More details can be found in [this paper](https://www.isca-speech.org/archive/Odyssey_2018/pdfs/60.pdf): 
+
+```bibtex
+@inproceedings{Patino2018,
+  Title = {{Low-Latency Speaker Spotting with Online Diarization and Detection}},
+  Author = {Jose Patino and Ruiqing Yin and H\'{e}ctor Delgado and Herv\'{e} Bredin and Alain Komaty and Guillaume Wisniewski and Claude Barras and Nicholas Evans and S\'{e}bastien Marcel},
+  Booktitle = {{Odyssey 2018, The Speaker and Language Recognition Workshop}},
+  Pages = {140--146},
+  Year = {2018},
+  Month = {June},
+  Address = {Les Sables d'Olonnes, France},
+  url = {http://dx.doi.org/10.21437/Odyssey.2018-20},
+}
+```
+
 Protocol is initialized as follows:
 
 ```python
@@ -114,6 +129,7 @@ Protocol is initialized as follows:
 >>> protocol = get_protocol('AMI.SpeakerSpotting.MixHeadset',
 ...                         preprocessors=preprocessors)
 ```
+
 
 ### Training
 
