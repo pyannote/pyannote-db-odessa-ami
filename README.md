@@ -6,7 +6,17 @@
 $ pip install pyannote.db.odessa.ami
 ```
 
-Tell `pyannote` where to look for AMI audio files.
+You should then download the dataset files. This repo provides a download script for the required files in the `AMI/db_download/` folder. You can download that file independently from the repository, and run it:
+
+```bash
+$ bash ./download.sh /where/you/want/to/download/the/data/
+```
+
+You can also download them "by hand" on the [official website](http://groups.inf.ed.ac.uk/ami/download/) by checking all the AMI meetings and only the Headset mix stream.
+
+For some reason, `scipy.io.wavfile` (heavily used in `pyannote.audio`) cannot read some of those files (`ValueError: Incomplete wav chunk.`). See https://github.com/pyannote/pyannote-audio/issues/146#issuecomment-461733210 for a solution to this problem.
+
+Then, tell `pyannote` where to look for AMI audio files.
 
 ```bash
 $ cat ~/.pyannote/db.yml
@@ -96,6 +106,21 @@ redefined.
 Moreover, original files have also been split into shorter sessions in order to
 increase the number of trials.
 
+More details can be found in [this paper](https://www.isca-speech.org/archive/Odyssey_2018/pdfs/60.pdf): 
+
+```bibtex
+@inproceedings{Patino2018,
+  Title = {{Low-Latency Speaker Spotting with Online Diarization and Detection}},
+  Author = {Jose Patino and Ruiqing Yin and H\'{e}ctor Delgado and Herv\'{e} Bredin and Alain Komaty and Guillaume Wisniewski and Claude Barras and Nicholas Evans and S\'{e}bastien Marcel},
+  Booktitle = {{Odyssey 2018, The Speaker and Language Recognition Workshop}},
+  Pages = {140--146},
+  Year = {2018},
+  Month = {June},
+  Address = {Les Sables d'Olonnes, France},
+  url = {http://dx.doi.org/10.21437/Odyssey.2018-20},
+}
+```
+
 Protocol is initialized as follows:
 
 ```python
@@ -104,6 +129,7 @@ Protocol is initialized as follows:
 >>> protocol = get_protocol('AMI.SpeakerSpotting.MixHeadset',
 ...                         preprocessors=preprocessors)
 ```
+
 
 ### Training
 

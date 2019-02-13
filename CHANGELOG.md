@@ -1,3 +1,11 @@
+### Version 1.0 (2019-02-13)
+
+  - feat: add AMI.SpeakerSpotting.MixHeadset{Intra|Inter}Site protocols
+  - feat: add AMI download script (@hadware)
+  - setup: switch to pyannote.core 2.1
+  - setup: switch to pyannote.database 1.5.5 
+  - doc: add link to speaker spotting paper
+
 ### Version 0.7 (2018-02-05)
 
   - feat: add support for 'diarization' attribute to enable/disable
