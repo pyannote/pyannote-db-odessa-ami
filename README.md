@@ -14,7 +14,9 @@ $ bash ./download.sh /where/you/want/to/download/the/data/
 
 You can also download them "by hand" on the [official website](http://groups.inf.ed.ac.uk/ami/download/) by checking all the AMI meetings and only the Headset mix stream.
 
-For some reason, `scipy.io.wavfile` (heavily used in `pyannote.audio`) cannot read some of those files (`ValueError: Incomplete wav chunk.`). See https://github.com/pyannote/pyannote-audio/issues/146#issuecomment-461733210 for a solution to this problem.
+
+⚠ The bash download script also "fixes" some of the files from the dataset that are unreadable with scipy because of wrongly formatted wav chunks. The audio files are thus not *exactly* the same as the original one.
+
 
 Then, tell `pyannote` where to look for AMI audio files.
 

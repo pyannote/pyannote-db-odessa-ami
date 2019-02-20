@@ -166,6 +166,73 @@ wget    --continue -P $DLFOLDER/TS3012b/audio http://groups.inf.ed.ac.uk/ami/AMI
 wget    --continue -P $DLFOLDER/TS3012c/audio http://groups.inf.ed.ac.uk/ami/AMICorpusMirror//amicorpus/TS3012c/audio/TS3012c.Mix-Headset.wav
 wget    --continue -P $DLFOLDER/TS3012d/audio http://groups.inf.ed.ac.uk/ami/AMICorpusMirror//amicorpus/TS3012d/audio/TS3012d.Mix-Headset.wav
 
+
+function fix_wav(){
+python - $1 <<END
+import wave
+import argparse
+import io
+
+
+def normalize_wav(input_file, output_file):
+    with wave.open(input_file, "rb") as r_wav, wave.open(output_file, "wb") as w_wav:
+        w_wav.setparams(r_wav.getparams())
+        w_wav.writeframes(r_wav.readframes(r_wav.getnframes()))
+
+
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("input", type=str, help="path to file to overwrite")
+    args = argparser.parse_args()
+
+    # writing the new wav into a buffer, to prevent overwriting the original
+    # file
+    buff = io.BytesIO()
+    normalize_wav(args.input, buff)
+    with open(args.input, "wb") as wav_file:
+        wav_file.write(buff.getvalue())
+
+    try:
+        from scipy.io.wavfile import read
+    except ImportError:
+        print("Scipy not installed. "
+              "Could not test if the file %s was properly fixed to work "
+              "with the scipy wave read function" % args.input)
+    else:
+        # test-opening the file with scipy
+        rate, data = read(args.input)
+        print("%s has been properly reformated" % args.input)
+END
+}
+
+echo "Fixing wav files with invalid chunks"
+
+fix_wav $DLFOLDER/IS1004d/audio/IS1004d.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1006c/audio/IS1006c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1008d/audio/IS1008d.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1007a/audio/IS1007a.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1008c/audio/IS1008c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1005a/audio/IS1005a.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1008b/audio/IS1008b.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1009b/audio/IS1009b.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1002c/audio/IS1002c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1004b/audio/IS1004b.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1008a/audio/IS1008a.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1004a/audio/IS1004a.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1005b/audio/IS1005b.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1007c/audio/IS1007c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1004c/audio/IS1004c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1009c/audio/IS1009c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1003c/audio/IS1003c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1009a/audio/IS1009a.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1009d/audio/IS1009d.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1006a/audio/IS1006a.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1005c/audio/IS1005c.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1006d/audio/IS1006d.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1003d/audio/IS1003d.Mix-Headset.wav
+fix_wav $DLFOLDER/IS1007b/audio/IS1007b.Mix-Headset.wav
+
+
 echo "#####################################"
 echo "Now add the following line to your ~/.pyannote/db.yml file"
 echo "AMI: $DLFOLDER/*/audio/{uri}.wav"
