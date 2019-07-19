@@ -18,11 +18,12 @@ You can also download them "by hand" on the [official website](http://groups.inf
 ⚠ The bash download script also "fixes" some of the files from the dataset that are unreadable with scipy because of wrongly formatted wav chunks. The audio files are thus not *exactly* the same as the original one.
 
 
-Then, tell `pyannote` where to look for AMI audio files.
+Then, tell `pyannote.database` where to look for AMI audio files.
 
 ```bash
-$ cat ~/.pyannote/db.yml
-AMI: /path/to/amicorpus/*/audio/{uri}.wav
+$ cat ~/.pyannote/database.yml
+Databases:
+   AMI: /path/to/amicorpus/*/audio/{uri}.wav
 ```
 
 ## Speaker diarization protocol
